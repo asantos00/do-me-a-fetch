@@ -1,0 +1,26 @@
+{
+  "name": "do-me-a-fetch",
+  "version": "1.0.0",
+  "description": "A lib that does fetch using es6 fetch",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asantos00/do-me-a-fetch.git"
+  },
+  "keywords": [
+    "fetch",
+    "ajax"
+  ],
+  "author": "ampsantos0",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/asantos00/do-me-a-fetch/issues"
+  },
+  "homepage": "https://github.com/asantos00/do-me-a-fetch#readme",
+  "dependencies": {
+    "node-fetch": "^1.5.3"
+  }
+}
