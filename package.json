@@ -21,6 +21,5 @@
   },
   "homepage": "https://github.com/asantos00/do-me-a-fetch#readme",
   "dependencies": {
-    "node-fetch": "^1.5.3"
   }
 }

@@ -1,6 +1,14 @@
-const fetch = require('node-fetch');
+let fetch;
 
-const create = (config) => {
+const create = ({
+  config = {}, 
+  injectedFetch, 
+  onError = () => ({}), 
+  onStart = () => ({}), 
+  onFinish = () => ({})
+}) => {
+  
+  fetch = injectedFetch; 
   let baseRequest = {
     mode: 'cors',
     redirect: 'follow',
@@ -10,6 +18,23 @@ const create = (config) => {
     }
   }
   let request = Object.assign({}, baseRequest, config)
+
+
+  const GET = requestCreator => (url, data) => {
+    return executeRequest({request: requestCreator('get'), url: url + parseObjectToQueryParam(data), onError: onError, onStart: onStart, onFinish: onFinish})
+  }
+
+  const POST = requestCreator => (url, data) => {
+    return executeRequest({request: requestCreator('post', data), url: url, onError: onError, onStart: onStart, onFinish: onFinish})
+  }
+
+  const PUT = requestCreator => (url, data) => {
+    return executeRequest({request: requestCreator('put', data), url: url, onError: onError, onStart: onStart, onFinish: onFinish})
+  }
+
+  const DELETE = requestCreator => (url, data) => {
+    return executeRequest({request: requestCreator('delete', data), url: url, onError: onError, onStart: onStart, onFinish: onFinish})
+  }
 
   return {
     'POST': POST(createRequest(request)),
@@ -38,31 +63,15 @@ const createRequest = baseRequest => (method, data) => {
 
 }
 
-const GET = requestCreator => (url, data) => {
-  return executeRequest({request: requestCreator('get'), url: url + parseObjectToQueryParam(data)})
-}
-
-const POST = requestCreator => (url, data) => {
-  return executeRequest({request: requestCreator('post', data), url: url})
-}
-
-const PUT = requestCreator => (url, data) => {
-  return executeRequest({request: requestCreator('put', data), url: url})
-}
-
-const DELETE = requestCreator => (url, data) => {
-  return executeRequest({request: requestCreator('delete', data), url: url})
-}
-
 const executeRequest = (params) => {
-  
+  params.onStart(params)
   return fetch(params.url, params.request)
     .then(response => {
       return response.json()
         .then(json => ({data: json, status: response.status, url: response.url }) )
     })
     .then(requestDone)
-    .catch(requestError)
+    .catch(params.onError)
 }
 
 const requestDone = (request) => {
@@ -75,16 +84,14 @@ const requestDone = (request) => {
       return Promise.reject(request)
   }
 
-  return Promise.resolve(request)
+  return Promise.resolve(request.data)
 
 }
 
-// Global error handler
-// Used for reports, global popups and so on
+// Default error handler
 const requestError = (err) => {
   return Promise.reject(err)
 }
-
 
 // Transforms a JSON to query parameter
 const parseObjectToQueryParam  = (json) => {
@@ -96,4 +103,13 @@ const parseObjectToQueryParam  = (json) => {
   return a;
 }
 
-module.exports = create;
+export default create
+/*
+const instance = create({config: {}, injectedFetch: window.fetch})
+
+export const POST = instance.POST
+export const GET = instance.GET
+export const PUT = instance.PUT
+export const DELETE = instance.DELETE
+*/
+
